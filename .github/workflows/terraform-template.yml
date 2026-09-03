@@ -1,3 +1,4 @@
+```yaml
 name: Terraform Reusable Workflow
 
 on:
@@ -48,3 +49,8 @@ jobs:
       - name: Terraform Plan
         working-directory: ${{ inputs.working-directory }}
         run: terraform plan
+
+      - name: Terraform Apply
+        working-directory: ${{ inputs.working-directory }}
+        run: terraform apply -auto-approve
+```
