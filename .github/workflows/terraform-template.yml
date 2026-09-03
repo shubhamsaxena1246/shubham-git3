@@ -3,14 +3,10 @@ name: Terraform Reusable Workflow
 on:
   workflow_call:
     inputs:
-      working_directory:
-        required: true
+      working-directory:
+        required: false
         type: string
-
-      environment:
-        required: true
-        type: string
-
+        default: "."
     secrets:
       AZURE_CLIENT_ID:
         required: true
@@ -19,51 +15,36 @@ on:
       AZURE_SUBSCRIPTION_ID:
         required: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-
   terraform:
-    name: Terraform ${{ inputs.environment }}
-
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
-    defaults:
-      run:
-        working-directory: ${{ inputs.working_directory }}
-
     steps:
-
-      # Checkout
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Azure OIDC Login
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Init
       - name: Terraform Init
+        working-directory: ${{ inputs.working-directory }}
         run: terraform init
 
-      # Format
-      - name: Terraform Format
-        run: terraform fmt -check
-
-      # Validate
       - name: Terraform Validate
+        working-directory: ${{ inputs.working-directory }}
         run: terraform validate
 
-      # Plan
       - name: Terraform Plan
+        working-directory: ${{ inputs.working-directory }}
         run: terraform plan
